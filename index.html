@@ -1,1 +1,1039 @@
-hi
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پزشکیار - دستیار پزشکی هوشمند</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-gradient-start: #e0f7fa;
+            --bg-gradient-end: #b2ebf2;
+            --header-gradient-start: #00acc1;
+            --header-gradient-end: #00838f;
+            --card-bg: white;
+            --message-user-bg: linear-gradient(90deg, #00acc1 0%, #00838f 100%);
+            --message-bot-bg: #f5f5f5;
+            --text-color: #333;
+            --border-color: #e0f7fa;
+            --quick-actions-bg: #f9f9f9;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --primary-color: #00acc1;
+            --secondary-color: #00838f;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-gradient-start: #1a2332;
+                --bg-gradient-end: #2c3e50;
+                --header-gradient-start: #006064;
+                --header-gradient-end: #004d40;
+                --card-bg: #2c3e50;
+                --message-user-bg: linear-gradient(90deg, #006064 0%, #004d40 100%);
+                --message-bot-bg: #34495e;
+                --text-color: #ecf0f1;
+                --border-color: #34495e;
+                --quick-actions-bg: #34495e;
+                --shadow-color: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: calc(100vh - 40px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px var(--shadow-color);
+            overflow: hidden;
+            height: 100%;
+            min-height: 500px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            animation: fadeIn 0.3s;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .user .avatar {
+            background: var(--message-user-bg);
+        }
+
+        .bot .avatar {
+            background: linear-gradient(90deg, #26a69a 0%, #00897b 100%);
+        }
+
+        .message-content-wrapper {
+            max-width: 70%;
+            position: relative;
+        }
+
+        .message-content {
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            position: relative;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+
+        .user .message-content {
+            background: var(--message-user-bg);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot .message-content {
+            background: var(--message-bot-bg);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .user .message-time {
+            text-align: left;
+        }
+
+        .bot .message-content strong, .bot .message-content b {
+            color: #00acc1;
+            font-weight: 700;
+        }
+
+        .bot .message-content ul, .bot .message-content ol {
+            margin-right: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bot .message-content li {
+            margin-bottom: 0.3rem;
+        }
+
+        .message-actions {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .typing-indicator.show {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typingAnimation 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .chat-input-container {
+            padding: 1rem;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        #chatInput {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        #chatInput:focus {
+            outline: none;
+            border-color: var(--header-gradient-start);
+        }
+
+        #chatInput:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #sendBtn, #stopBtn, #resetBtn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        #sendBtn {
+            background: linear-gradient(90deg, var(--header-gradient-start) 0%, var(--header-gradient-end) 100%);
+        }
+
+        #stopBtn {
+            background: linear-gradient(90deg, #f44336 0%, #d32f2f 100%);
+            display: none;
+        }
+
+        #resetBtn {
+            background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+            margin-left: 5px;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0, 137, 123, 0.3);
+        }
+
+        #stopBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(244, 67, 54, 0.3);
+        }
+
+        #resetBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(255, 152, 0, 0.3);
+        }
+
+        #sendBtn:active, #stopBtn:active, #resetBtn:active {
+            transform: scale(0.95);
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-color);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 2rem;
+            color: var(--header-gradient-start);
+            font-size: 1.8rem;
+        }
+
+        .medical-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(90deg, var(--header-gradient-start) 0%, var(--header-gradient-end) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            position: relative;
+            box-shadow: 0 10px 20px var(--shadow-color);
+        }
+
+        .medical-icon i {
+            color: white;
+            font-size: 3rem;
+        }
+
+        .medical-icon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            top: 0;
+            left: 0;
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .sub-welcome-text {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .quick-actions-center {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            max-width: 600px;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .quick-action-btn {
+            background: var(--message-bot-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            animation: slideUp 0.5s ease-out forwards;
+            opacity: 0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        .quick-action-btn:nth-child(1) { animation-delay: 0.1s; }
+        .quick-action-btn:nth-child(2) { animation-delay: 0.2s; }
+        .quick-action-btn:nth-child(3) { animation-delay: 0.3s; }
+        .quick-action-btn:nth-child(4) { animation-delay: 0.4s; }
+        .quick-action-btn:nth-child(5) { animation-delay: 0.5s; }
+        .quick-action-btn:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .quick-action-btn i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            background: rgba(0, 172, 193, 0.1);
+            padding: 0.75rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover {
+            background: linear-gradient(145deg, #f0f0f0, #ffffff);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .quick-action-btn:hover i {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .quick-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--header-gradient-start);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .loading-logo i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .loading-logo h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 172, 193, 0.2);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        .loading-developer {
+            margin-top: 0.5rem;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            opacity: 0.8;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .message-content-wrapper {
+                max-width: 85%;
+            }
+            
+            .chat-container {
+                height: calc(100vh - 20px);
+            }
+            
+            .quick-actions-center {
+                grid-template-columns: 1fr;
+            }
+
+            .message-actions {
+                bottom: -35px;
+            }
+
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+
+            .medical-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .medical-icon i {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            main {
+                padding: 0;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+            }
+
+            .message-content-wrapper {
+                max-width: 90%;
+            }
+
+            .message-actions {
+                bottom: -33px;
+            }
+
+            .action-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+
+            .message-content {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.95rem;
+            }
+
+            .avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+
+            .chat-input-container {
+                padding: 0.8rem;
+            }
+
+            #chatInput {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.95rem;
+            }
+
+            #sendBtn, #stopBtn, #resetBtn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .medical-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .medical-icon i {
+                font-size: 2rem;
+            }
+
+            .welcome-text {
+                font-size: 1.1rem;
+            }
+
+            .sub-welcome-text {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .message-content-wrapper {
+                max-width: 95%;
+            }
+
+            .message-actions {
+                bottom: -30px;
+            }
+
+            .action-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 0.7rem;
+            }
+
+            .quick-action-btn {
+                padding: 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .medical-icon {
+                width: 70px;
+                height: 70px;
+            }
+
+            .medical-icon i {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <i class="fas fa-stethoscope"></i>
+            <h1>پزشکیار</h1>
+        </div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">در حال بارگذاری...</div>
+        <div class="loading-developer">توسعه یافته توسط تیم برنامه نویسی بیت کد</div>
+    </div>
+
+    <div class="app-container">
+        <main>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message" id="welcomeMessage">
+                        <div class="medical-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h2>اگر سوالات پزشکی دارید</h2>
+                        <p class="sub-welcome-text">دستیار پزشکی هوشمند برای پاسخ به سؤالات پزشکی شما</p>
+                        <div class="quick-actions-center">
+                            <button class="quick-action-btn">
+                                <i class="fas fa-lungs"></i>
+                                علت سرفه خشک
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-thermometer-half"></i>
+                                علائم آنفولانزا
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-head-side-virus"></i>
+                                درمان سردرد
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-heartbeat"></i>
+                                فشار خون چیست
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-tint"></i>
+                                علائم دیابت
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-virus"></i>
+                                پیشگیری از کرونا
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="avatar">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" placeholder="سؤالی دارید با ما در میان بگذارید">
+                    <button id="resetBtn" title="پاک کردن چت">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button id="stopBtn">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 1500);
+
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const chatMessages = document.getElementById('chatMessages');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const toast = document.getElementById('toast');
+            
+            let welcomeMessageShown = true;
+            let chatHistory = [];
+            let isRequestInProgress = false;
+            let abortController = null;
+
+            function loadChatHistory() {
+                const saved = localStorage.getItem('pezeshkiyarChatHistory');
+                if (saved) {
+                    chatHistory = JSON.parse(saved);
+                    if (chatHistory.length > 0) {
+                        welcomeMessage.remove();
+                        welcomeMessageShown = false;
+                        chatHistory.forEach(msg => {
+                            addMessageToChat(msg.content, msg.isUser, msg.time, false);
+                        });
+                    }
+                }
+            }
+
+            function saveChatHistory() {
+                localStorage.setItem('pezeshkiyarChatHistory', JSON.stringify(chatHistory));
+            }
+
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            function getCurrentTime() {
+                const now = new Date();
+                return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            }
+
+            function setRequestState(inProgress) {
+                isRequestInProgress = inProgress;
+                chatInput.disabled = inProgress;
+                
+                if (inProgress) {
+                    sendBtn.style.display = 'none';
+                    stopBtn.style.display = 'flex';
+                    quickActionBtns.forEach(btn => btn.disabled = true);
+                } else {
+                    sendBtn.style.display = 'flex';
+                    stopBtn.style.display = 'none';
+                    quickActionBtns.forEach(btn => btn.disabled = false);
+                }
+            }
+
+            function addMessageToChat(content, isUser = false, time = null, save = true) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-user-md"></i>';
+                
+                const messageContentWrapper = document.createElement('div');
+                messageContentWrapper.className = 'message-content-wrapper';
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.innerHTML = content;
+                
+                const messageTime = document.createElement('div');
+                messageTime.className = 'message-time';
+                messageTime.textContent = time || getCurrentTime();
+                
+                messageContentWrapper.appendChild(messageContent);
+                messageContentWrapper.appendChild(messageTime);
+                
+                if (!isUser) {
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'message-actions';
+                    actionsDiv.innerHTML = `
+                        <button class="action-btn copy-btn" title="کپی کردن"><i class="fas fa-copy"></i></button>
+                        <button class="action-btn share-btn" title="اشتراک‌گذاری"><i class="fas fa-share"></i></button>
+                    `;
+                    messageContentWrapper.appendChild(actionsDiv);
+                    
+                    actionsDiv.querySelector('.copy-btn').addEventListener('click', function() {
+                        const textToCopy = content.replace(/<[^>]*>/g, '');
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            showToast('متن با موفقیت کپی شد!');
+                        }).catch(() => {
+                            showToast('خطا در کپی کردن متن!');
+                        });
+                    });
+                    
+                    actionsDiv.querySelector('.share-btn').addEventListener('click', function() {
+                        const textToShare = content.replace(/<[^>]*>/g, '');
+                        if (navigator.share) {
+                            navigator.share({
+                                title: 'پزشکیار',
+                                text: textToShare
+                            }).catch(() => {
+                                showToast('اشتراک‌گذاری لغو شد');
+                            });
+                        } else {
+                            navigator.clipboard.writeText(textToShare).then(() => {
+                                showToast('متن برای اشتراک‌گذاری کپی شد!');
+                            });
+                        }
+                    });
+                }
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(messageContentWrapper);
+                chatMessages.appendChild(messageDiv);
+                
+                if (save) {
+                    chatHistory.push({
+                        content: content,
+                        isUser: isUser,
+                        time: time || getCurrentTime()
+                    });
+                    saveChatHistory();
+                }
+                
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 100);
+            }
+
+            function addMessage(content, isUser = false) {
+                if (welcomeMessageShown) {
+                    welcomeMessage.remove();
+                    welcomeMessageShown = false;
+                }
+                
+                addMessageToChat(content, isUser, null, true);
+            }
+
+            function formatBotResponse(text) {
+                let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                formattedText = formattedText.replace(/\n\n/g, '</p><p>');
+                formattedText = '<p>' + formattedText + '</p>';
+                formattedText = formattedText.replace(/(\d+\.\s)/g, '<li>$1');
+                formattedText = formattedText.replace(/(<li>.*?)(?=<li>|<\/p>)/g, '$1</li>');
+                formattedText = formattedText.replace(/(<li>.*?<\/li>)+/g, '<ol>$&</ol>');
+                return formattedText;
+            }
+
+            function stopRequest() {
+                if (abortController) {
+                    abortController.abort();
+                    abortController = null;
+                }
+                typingIndicator.classList.remove('show');
+                addMessage('لغو شده', false);
+                setRequestState(false);
+            }
+
+            function resetChat() {
+                if (confirm('آیا از پاک کردن تمام چت‌ها اطمینان دارید؟')) {
+                    chatHistory = [];
+                    localStorage.removeItem('pezeshkiyarChatHistory');
+                    chatMessages.innerHTML = '';
+                    welcomeMessageShown = true;
+                    chatMessages.appendChild(welcomeMessage);
+                    showToast('چت با موفقیت پاک شد!');
+                }
+            }
+
+            async function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message || isRequestInProgress) return;
+                
+                addMessage(message, true);
+                chatInput.value = '';
+                
+                setRequestState(true);
+                
+                typingIndicator.classList.add('show');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                abortController = new AbortController();
+                
+                try {
+                    const apiUrl = `https://gpt4.api-sina-free.workers.dev/gpt4?text=${encodeURIComponent(message)}`;
+                    const response = await fetch(apiUrl, { 
+                        signal: abortController.signal 
+                    });
+                    const data = await response.json();
+                    
+                    typingIndicator.classList.remove('show');
+                    
+                    if (data.result) {
+                        const formattedResponse = formatBotResponse(data.result);
+                        addMessage(formattedResponse, false);
+                    } else {
+                        addMessage('متأسفانه پاسخی برای سؤال شما یافت نشد. لطفاً سؤال دیگری را امتحان کنید.', false);
+                    }
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        return;
+                    }
+                    console.error('Error fetching data:', error);
+                    typingIndicator.classList.remove('show');
+                    addMessage('خطایی در دریافت اطلاعات رخ داده است. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.', false);
+                } finally {
+                    setRequestState(false);
+                    abortController = null;
+                }
+            }
+
+            loadChatHistory();
+
+            sendBtn.addEventListener('click', sendMessage);
+            
+            stopBtn.addEventListener('click', stopRequest);
+            
+            resetBtn.addEventListener('click', resetChat);
+            
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !isRequestInProgress) {
+                    sendMessage();
+                }
+            });
+            
+            quickActionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!isRequestInProgress) {
+                        const text = btn.textContent.trim();
+                        chatInput.value = text;
+                        sendMessage();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
