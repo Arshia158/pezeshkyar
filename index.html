@@ -983,7 +983,7 @@
                 abortController = new AbortController();
                 
                 try {
-                    const apiUrl = `https://gpt4.api-sina-free.workers.dev/gpt4?text=${encodeURIComponent(message)}`;
+                    const apiUrl = `https://aipezeshk.api-sina-free.workers.dev/gpt4?text=${encodeURIComponent(message)}`;
                     const response = await fetch(apiUrl, { 
                         signal: abortController.signal 
                     });
